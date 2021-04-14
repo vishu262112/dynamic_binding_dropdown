@@ -1,0 +1,153 @@
+1)  Add this in AppointmentController
+
+@GetMapping("/doctor")
+		public List<Doctor> retrieveAllDoctors()
+		{
+			List<Doctor> doctors = doctorService.read();
+			
+			return doctors;
+		}
+		
+		@GetMapping("/medicaltest")
+		public List<MedicalTest> retrieveAllMedicalTest()
+		{
+			List<MedicalTest> medicalTest = medicalTestService.read();
+			return medicalTest;
+		}
+
+
+2) Add this in appointment.service.ts
+
+
+ doctorurl: string='http://localhost:8080/appointment/doctor';
+ medicaltesturl: string= 'http://localhost:8080/appointment/medicaltest';
+
+
+ getAllDoctors()
+  {
+    return this.http.get(this.doctorurl);
+  }
+
+  getAllMedicalTest()
+  {
+    return this.http.get(this.medicaltesturl);
+  }
+
+
+3) below code in appointment.component.ts
+
+interface Item {
+  text: string;
+  value: string;
+}
+
+
+@Component({
+  selector: 'app-appointment',
+  templateUrl: './appointment.component.html',
+  styleUrls: ['./appointment.component.css']
+})
+export class AppointmentComponent implements OnInit {
+
+   public timeList: Array<Item>= [
+    { text: '09.30', value: '09.30 '},
+    { text: '10.30', value: '10.30 ' },
+    { text: '10.30', value: '11.30 ' }
+];
+
+  selected = null;
+  appointmentForm:any;
+  appointments:any;
+
+  doctors:any;
+  medicalTests:any;
+
+
+  constructor( private fb:FormBuilder,private as:AppointmentService,private http:HttpClient) { 
+    this.appointmentForm= this.fb.group({
+      appointmentId:[''],
+      patientId:['134'],
+      testId:[null],
+      appointmentDate :[''],
+      timeSlot:[null],
+      doctorId:[null],
+      
+      
+      
+    });
+     this.doctors = [];
+     this.medicalTests =[];
+   }
+
+  get form()
+  {
+    return this.appointmentForm.controls;
+  }
+
+  ngOnInit(): void {
+    this.as.getAllDoctors().subscribe((data)=>
+    {
+      this.doctors= data;
+    });
+    this.as.getAllMedicalTest().subscribe((data)=>{
+      this.medicalTests = data;
+      console.log(this.medicalTests)
+    });
+    
+  
+  }
+
+
+
+4)in appointment.component.html
+
+
+<form [formGroup]="appointmentForm">
+    appointmentId:
+    <input type="text" name="" id="" formControlName = "appointmentId" class="form-control">
+    UserId:
+    <input type="text" name="" id="" formControlName="patientId" class="form-control">
+    Test:
+    
+    
+    <!-- <input type="text" name="" id="" formControlName="testId" class="form-control"> -->
+
+    <select formControlName="testId" class="form-control">
+        <option value="0">--Select--</option> 
+        <option *ngFor="let test of  medicalTests" value={{test.testId}}>{{test.testName}}</option>
+    </select>
+    Date:
+    <input type="date" name="" id="" formControlName="appointmentDate" class="form-control">
+    Time:
+    <!-- <input type="text" name="" id="" formControlName="timeSlot" class="form-control"> -->
+
+    <select formControlName="timeSlot" class="form-control">
+        <option value="0">--Select--</option> 
+        <option *ngFor="let time of  timeList" value={{time.value}}>{{time.text}}</option>
+    </select>
+
+
+    Doctor:
+    <select formControlName="doctorId" class="form-control">
+        <option value="0">--Select--</option> 
+        <option *ngFor="let doctor of  doctors" value={{doctor.doctorId}}>{{doctor.doctorFirstName}}</option>
+    </select>
+
+    <input type="submit" value="Submit" (click)="appointmentAdd()" class="btn btn-info"> &nbsp;
+    &nbsp;
+    <input type="submit" value="update" (click)="appointmentModify()" class="btn btn-info">
+    &nbsp;
+    &nbsp;
+    <input type="submit" value="delete" (click)="appointmentDelete()" class="btn btn-info">
+   
+
+
+</form>
+
+
+
+
+  
+
+ 
+  
